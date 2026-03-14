@@ -1,0 +1,18 @@
+/* ==========================================
+   DESIGN TOKENS & CSS VARIABLES
+   ========================================== */
+
+:root {
+    /* Farben & Theme */
+    --bg-left: #F5F3F7;
+    --bg-right: #FFFFFF;
+    --text-main: #111111;
+    --text-muted: #71717A;
+    --border: #E4E4E7;
+    
+    /* Exakte Charakter Farben */
+    --c-purple: #6B21FF;
+    --c-yellow: #F4D03F;
+    --c-black: #1A1A1A;
+    --c-orange: #FF7443;
+}

@@ -1,0 +1,73 @@
+/* ==========================================
+   LAYOUT – Left & Right Panels
+   Modern Card-Layout mit Rundungen
+   ========================================== */
+
+body {
+    padding: 16px;
+    gap: 16px;
+}
+
+.left-panel {
+    flex: 1.2;
+    background: url('../img/bg-chars.webp') center / cover no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    border-radius: 24px;
+    padding: 32px;
+    overflow: hidden;
+}
+
+/* Weißer Overlay für Transparenz */
+.left-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.25);
+    z-index: 0;
+    border-radius: inherit;
+}
+
+.svg-container {
+    width: 100%;
+    max-width: 500px;
+    height: 100%;
+    position: relative;
+    z-index: 1;
+    background: transparent;
+}
+
+.right-panel {
+    flex: 1;
+    max-width: 560px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+    border-radius: 24px;
+    background: url('../img/bg-login.webp') center / cover no-repeat;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    z-index: 10;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Overlay für Lesbarkeit */
+.right-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(2px);
+    z-index: 0;
+    border-radius: inherit;
+}
+
+.form-wrapper {
+    width: 100%;
+    max-width: 360px;
+    position: relative;
+    z-index: 1;
+}

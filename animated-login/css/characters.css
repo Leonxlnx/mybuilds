@@ -1,0 +1,173 @@
+/* ==========================================
+   SVG CHARACTER STYLES & ANIMATION STATES
+   ========================================== */
+
+/* Charaktere Basis-Setup – BODEN BLEIBT IMMER FEST */
+.char {
+    transform-box: fill-box;
+    transform-origin: bottom center;
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Body distortion – Richtung Maus verzerrt + Höhe
+   skewX = horizontal lean, scaleY = vertikale Verzerrung
+   BODEN BLEIBT FEST durch transform-origin: bottom center */
+#purple {
+    transform: skewX(calc(var(--mx, 0) * -5deg)) scaleY(calc(1 + var(--my, 0) * -0.04));
+}
+#black {
+    transform: skewX(calc(var(--mx, 0) * -4deg)) scaleY(calc(1 + var(--my, 0) * -0.03));
+}
+#orange {
+    transform: skewX(calc(var(--mx, 0) * -4deg)) scaleY(calc(1 + var(--my, 0) * -0.03));
+}
+#yellow {
+    transform: skewX(calc(var(--mx, 0) * 3deg)) scaleY(calc(1 + var(--my, 0) * -0.03));
+}
+
+/* Gesichter (werden je nach State ein- und ausgeblendet) */
+.face {
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.face-hidden, .face-visible, .face-happy { opacity: 0; pointer-events: none; }
+.face-default { opacity: 1; }
+
+/* Pupillen Augen Bewegung (via CSS Variables --mx, --my) */
+.eye-tracker {
+    transform: translate(calc(var(--mx, 0) * 5px), calc(var(--my, 0) * 3px));
+}
+
+.pupil {
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ==========================================
+   INTERAKTIONS-ZUSTÄNDE
+   NUR skew + scaleY – NIEMALS Boden ändern!
+   ========================================== */
+
+/* 1. E-Mail Fokus – Alle lehnen sich krass rüber Richtung Feld */
+body.focus-email #purple { transform: skewX(-12deg) scaleY(1.04); }
+body.focus-email #black  { transform: skewX(-8deg) scaleY(1.05); }
+body.focus-email #yellow { transform: skewX(-6deg) scaleY(1.02); }
+body.focus-email #orange { transform: skewX(-6deg) scaleY(1.03); }
+
+/* 2. Passwort (hidden) – Weggucken nach links */
+body.focus-password-hidden #purple { transform: skewX(12deg) scaleY(0.95); }
+body.focus-password-hidden #black  { transform: skewX(8deg) scaleY(0.88); }
+body.focus-password-hidden #yellow { transform: skewX(10deg) scaleY(0.95); }
+body.focus-password-hidden #orange { transform: skewX(6deg) scaleY(0.92); }
+
+/* Gesichter drehen sich leicht nach links */
+body.focus-password-hidden .faces {
+    transform: translateX(-8px);
+    transition: transform 0.5s ease-in-out;
+}
+
+body.focus-password-hidden .face-default,
+body.focus-password-hidden .face-visible { opacity: 0; }
+body.focus-password-hidden .face-hidden  { opacity: 1; }
+
+/* 3. Passwort (visible) – NEUGIERIG! Alle lehnen sich HART rüber zum Gucken 👀 */
+body.focus-password-visible #purple { transform: skewX(-18deg) scaleY(1.08); }
+body.focus-password-visible #black  { transform: skewX(-14deg) scaleY(1.1); }
+body.focus-password-visible #yellow { transform: skewX(-10deg) scaleY(1.06); }
+body.focus-password-visible #orange { transform: skewX(-12deg) scaleY(1.07); }
+
+/* Augen weit auf + schielen HEFTIG rüber */
+body.focus-password-visible .eye-tracker {
+    transform: translate(10px, -2px) !important;
+}
+
+body.focus-password-visible .face-default,
+body.focus-password-visible .face-hidden  { opacity: 0; }
+body.focus-password-visible .face-visible { opacity: 1; }
+
+body.focus-password-visible .pupil { transform: scale(1.5); }
+
+/* ==========================================
+   4. LOGIN FAIL – Schütteln + genervt
+   ========================================== */
+body.login-fail .char {
+    animation: charShake 0.15s ease-in-out 4;
+}
+body.login-fail #purple { transform: scaleY(0.9); }
+body.login-fail #black  { transform: scaleY(0.85); }
+body.login-fail #yellow { transform: scaleY(0.9); }
+body.login-fail #orange { transform: scaleY(0.88); }
+
+body.login-fail .face-default,
+body.login-fail .face-visible { opacity: 0; }
+body.login-fail .face-hidden  { opacity: 1; }
+
+@keyframes charShake {
+    0%, 100% { transform: translateX(0); }
+    25%      { transform: translateX(-6px); }
+    75%      { transform: translateX(6px); }
+}
+
+/* ==========================================
+   5. LOGIN SUCCESS – Bounce down + Color Explosion 🎉
+   ========================================== */
+
+/* Phase 1: Happy face + bounce down */
+body.login-success .face-default,
+body.login-success .face-hidden,
+body.login-success .face-visible { opacity: 0; }
+body.login-success .face-happy { opacity: 1; }
+
+body.login-success .char {
+    animation: bounceDown 0.8s cubic-bezier(0.6, -0.28, 0.74, 0.05) forwards;
+}
+body.login-success #purple { animation-delay: 0.1s; }
+body.login-success #black  { animation-delay: 0.2s; }
+body.login-success #orange { animation-delay: 0.3s; }
+body.login-success #yellow { animation-delay: 0.4s; }
+
+@keyframes bounceDown {
+    0%   { transform: scaleY(1) translateY(0); opacity: 1; }
+    15%  { transform: scaleY(1.15) translateY(-20px); opacity: 1; }
+    35%  { transform: scaleY(0.8) translateY(0); opacity: 1; }
+    100% { transform: scaleY(0.5) translateY(250%); opacity: 0; }
+}
+
+/* Color splash circles – placed via JS */
+.color-splash {
+    position: fixed;
+    border-radius: 50%;
+    transform: scale(0);
+    pointer-events: none;
+    z-index: 9999;
+}
+
+.color-splash.pop {
+    animation: splashGrow 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes splashGrow {
+    0%   { transform: scale(0); opacity: 1; }
+    70%  { opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* White wipe overlay */
+.white-wipe {
+    position: fixed;
+    inset: 0;
+    background: #fff;
+    z-index: 10000;
+    transform: translateX(-100%);
+    pointer-events: none;
+}
+
+.white-wipe.sweep {
+    animation: wipeSweep 1.0s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes wipeSweep {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(0%); }
+}
+

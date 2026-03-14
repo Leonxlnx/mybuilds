@@ -1,0 +1,180 @@
+/* ==========================================
+   FORM STYLES – Inputs, Buttons, Options
+   ========================================== */
+
+.logo { 
+    width: 32px; 
+    height: 32px; 
+    margin: 0 auto 24px auto; 
+    display: block; 
+}
+
+h1 { 
+    font-size: 32px; 
+    color: var(--text-main); 
+    text-align: center; 
+    margin-bottom: 8px; 
+    letter-spacing: -0.5px;
+}
+
+p.subtitle { 
+    color: var(--text-muted); 
+    font-size: 15px; 
+    text-align: center; 
+    margin-bottom: 40px; 
+}
+
+/* --- Input Groups --- */
+.input-group { margin-bottom: 20px; }
+.input-group label { 
+    display: block; 
+    font-size: 14px; 
+    font-weight: 600; 
+    color: var(--text-main); 
+    margin-bottom: 8px; 
+}
+
+.input-wrapper { position: relative; }
+.input-wrapper input {
+    width: 100%; 
+    padding: 14px 16px; 
+    border-radius: 12px; 
+    border: 1.5px solid rgba(0, 0, 0, 0.2);
+    font-size: 15px; 
+    color: var(--text-main); 
+    background-color: rgba(255, 255, 255, 0.6);
+    outline: none; 
+    transition: all 0.2s ease; 
+    font-family: inherit;
+}
+.input-wrapper input:focus {
+    border-color: var(--text-main); 
+    box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.1);
+    background-color: rgba(255, 255, 255, 0.85);
+}
+
+/* --- Eye Toggle (Password Visibility) --- */
+.eye-toggle {
+    position: absolute; 
+    right: 12px; 
+    top: 50%; 
+    transform: translateY(-50%);
+    background: none; 
+    border: none; 
+    cursor: pointer; 
+    padding: 4px; 
+    color: var(--text-muted);
+    transition: color 0.2s; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+}
+.eye-toggle:hover { color: var(--text-main); }
+
+/* --- Options Row (Checkbox + Forgot) --- */
+.options {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    margin-bottom: 30px; 
+    font-size: 14px;
+}
+
+.checkbox-label { 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    color: var(--text-muted); 
+    cursor: pointer; 
+    font-weight: 500;
+}
+
+/* Custom UI Checkbox */
+.checkbox-label input {
+    appearance: none; 
+    -webkit-appearance: none; 
+    width: 18px; 
+    height: 18px;
+    border: 2px solid var(--border); 
+    border-radius: 4px;
+    position: relative; 
+    cursor: pointer; 
+    outline: none; 
+    transition: all 0.2s;
+}
+.checkbox-label input:checked { 
+    background-color: var(--text-main); 
+    border-color: var(--text-main); 
+}
+.checkbox-label input:checked::after {
+    content: ''; 
+    position: absolute; 
+    top: 2px; 
+    left: 5px; 
+    width: 4px; 
+    height: 8px;
+    border: solid white; 
+    border-width: 0 2px 2px 0; 
+    transform: rotate(45deg);
+}
+
+.forgot { 
+    color: var(--text-main); 
+    text-decoration: none; 
+    font-weight: 600; 
+}
+.forgot:hover { text-decoration: underline; }
+
+/* --- Buttons --- */
+.btn {
+    width: 100%; 
+    padding: 14px; 
+    border-radius: 12px; 
+    font-size: 15px; 
+    font-weight: 600;
+    cursor: pointer; 
+    transition: all 0.2s; 
+    display: flex; 
+    justify-content: center;
+    align-items: center; 
+    gap: 10px; 
+    margin-bottom: 16px; 
+    font-family: inherit;
+}
+
+.btn-primary { 
+    background: var(--text-main); 
+    color: #fff; 
+    border: none; 
+}
+.btn-primary:hover { 
+    background: #000; 
+    transform: translateY(-2px); 
+    box-shadow: 0 6px 16px rgba(0,0,0,0.15); 
+}
+
+.btn-google { 
+    background: rgba(255, 255, 255, 0.7); 
+    color: var(--text-main); 
+    border: 1.5px solid rgba(0, 0, 0, 0.15); 
+}
+.btn-google:hover { 
+    background: #FAFAFA; 
+    border-color: #D4D4D8; 
+    transform: translateY(-2px); 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* --- Sign Up Link --- */
+.signup { 
+    text-align: center; 
+    color: var(--text-muted); 
+    font-size: 14px; 
+    margin-top: 30px; 
+}
+.signup a { 
+    color: var(--text-main); 
+    font-weight: 600; 
+    text-decoration: none; 
+}
+.signup a:hover { text-decoration: underline; }

@@ -1,0 +1,21 @@
+/* ==========================================
+   RESPONSIVE – Mobile & Tablet Breakpoints
+   ========================================== */
+
+@media (max-width: 900px) {
+    body { 
+        flex-direction: column; 
+        overflow: auto; 
+    }
+    .left-panel { 
+        min-height: 400px; 
+        width: 100%; 
+        flex: none; 
+    }
+    .right-panel { 
+        width: 100%; 
+        max-width: none; 
+        box-shadow: none; 
+        padding: 40px 20px; 
+    }
+}

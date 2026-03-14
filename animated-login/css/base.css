@@ -1,0 +1,24 @@
+/* ==========================================
+   BASE / RESET STYLES
+   ========================================== */
+
+* { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    display: flex;
+    height: 100vh;
+    background-color: var(--bg-right);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+body.loaded {
+    opacity: 1;
+}
