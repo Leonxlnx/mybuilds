@@ -5,4 +5,10 @@ export default defineConfig({
   plugins: [
     typegpu(),
   ],
+  build: {
+    target: 'esnext',
+  },
+  esbuild: {
+    target: 'esnext',
+  },
 });
