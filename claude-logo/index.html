@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Claude - Premium 3D Pixel Voxel Animation</title>
+    <style>
+        /* 
+         * ============================================================================
+         * GLOBAL STYLING & CLEAN PRESENTATION
+         * ==========================================
+         * Minimalist, text-free, zero-scroll interface.
+         * The background uses a sophisticated, deep, warm radial gradient 
+         * to emulate high-end cinematic studio lighting that perfectly 
+         * contrasts with the Claude Orange (#D97757).
+         * NO text, NO scrollbars, purely visual.
+         * ============================================================================
+         */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            /* Deep studio backdrop */
+            background-color: #0d0a09;
+            background: radial-gradient(circle at center, #261c18 0%, #080605 100%);
+            overflow: hidden;
+
+            /* Disable all user interactions as requested ("nicht steuerbar") */
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            cursor: default;
+        }
+
+        /* The WebGL Canvas container must have no outline */
+        #webgl-canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            outline: none;
+            z-index: 1;
+        }
+
+        /* 
+         * ============================================================================
+         * ABSTRACT PIXEL LOADING OVERLAY (NO TEXT)
+         * ==========================================
+         * Keeps the UI completely clean. A geometric 3D bouncing pixel block 
+         * signals the loading state while the heavy 3D voxel math is processed.
+         * ============================================================================
+         */
+        #preloader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #080605;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 1.5s cubic-bezier(0.16, 1, 0.3, 1), visibility 1.5s;
+        }
+
+        .pixel-spinner {
+            width: 24px;
+            height: 24px;
+            background-color: #D97757;
+            /* Claude Orange */
+            animation: flip-bounce 1.5s infinite cubic-bezier(0.4, 0.0, 0.2, 1);
+            box-shadow: 0 0 30px rgba(217, 119, 87, 0.5);
+        }
+
+        @keyframes flip-bounce {
+            0% {
+                transform: perspective(200px) rotateX(0deg) rotateY(0deg) scale(1);
+            }
+
+            50% {
+                transform: perspective(200px) rotateX(-180deg) rotateY(0deg) scale(1.2);
+                background-color: #FFB39A;
+            }
+
+            100% {
+                transform: perspective(200px) rotateX(-180deg) rotateY(-180deg) scale(1);
+            }
+        }
+    </style>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+
+<body>
+
+    <div id="preloader">
+        <div class="pixel-spinner"></div>
+    </div>
+
+    <canvas id="webgl-canvas"></canvas>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+        import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+        /* 
+         * ============================================================================
+         * 1. CORE CONFIGURATION & CONSTANTS
+         * ============================================================================
+         * Defining the extreme precision parameters for the 3D Pixel Art Engine.
+         */
+        const CONFIG = {
+            // The exact, precise vector path of the real Claude Asterisk logo
+            svgPath: "m19.6 66.5 19.7-11 .3-1-.3-.5h-1l-3.3-.2-11.2-.3L14 53l-9.5-.5-2.4-.5L0 49l.2-1.5 2-1.3 2.9.2 6.3.5 9.5.6 6.9.4L38 49.1h1.6l.2-.7-.5-.4-.4-.4L29 41l-10.6-7-5.6-4.1-3-2-1.5-2-.6-4.2 2.7-3 3.7.3.9.2 3.7 2.9 8 6.1L37 36l1.5 1.2.6-.4.1-.3-.7-1.1L33 25l-6-10.4-2.7-4.3-.7-2.6c-.3-1-.4-2-.4-3l3-4.2L28 0l4.2.6L33.8 2l2.6 6 4.1 9.3L47 29.9l2 3.8 1 3.4.3 1h.7v-.5l.5-7.2 1-8.7 1-11.2.3-3.2 1.6-3.8 3-2L61 2.6l2 2.9-.3 1.8-1.1 7.7L59 27.1l-1.5 8.2h.9l1-1.1 4.1-5.4 6.9-8.6 3-3.5L77 13l2.3-1.8h4.3l3.1 4.7-1.4 4.9-4.4 5.6-3.7 4.7-5.3 7.1-3.2 5.7.3.4h.7l12-2.6 6.4-1.1 7.6-1.3 3.5 1.6.4 1.6-1.4 3.4-8.2 2-9.6 2-14.3 3.3-.2.1.2.3 6.4.6 2.8.2h6.8l12.6 1 3.3 2 1.9 2.7-.3 2-5.1 2.6-6.8-1.6-16-3.8-5.4-1.3h-.8v.4l4.6 4.5 8.3 7.5L89 80.1l.5 2.4-1.3 2-1.4-.2-9.2-7-3.6-3-8-6.8h-.5v.7l1.8 2.7 9.8 14.7.5 4.5-.7 1.4-2.6 1-2.7-.6-5.8-8-6-9-4.7-8.2-.5.4-2.9 30.2-1.3 1.5-3 1.2-2.5-2-1.4-3 1.4-6.2 1.6-8 1.3-6.4 1.2-7.9.7-2.6v-.2H49L43 72l-9 12.3-7.2 7.6-1.7.7-3-1.5.3-2.8L24 86l10-12.8 6-7.9 4-4.6-.1-.5h-.3L17.2 77.4l-4.7.6-2-2 .2-3 1-1 8-5.5Z",
+
+            colors: {
+                base: '#D97757',      // Authentic Claude Orange
+                shadow: '#632615',    // Deep volumetric structural shadow
+                highlight: '#FFC8B3', // Piercing edge highlight
+                ambient: '#1A1310'    // Background match for fog
+            },
+
+            voxel: {
+                gridSize: 150,        // High resolution for clean, non-blocky geometry
+                boxSize: 0.84,        // Leaves a clean 0.16 gap to enforce the Pixel Art aesthetic
+                spacing: 1.0,         // Coordinate step
+                depthMultiplier: 1.6, // How thick the 3D model becomes in the center
+            },
+
+            anim: {
+                flightDuration: 2.5,  // Seconds for assembly
+                cameraDistance: 190   // Cinematic framing
+            }
+        };
+
+        /* 
+         * ============================================================================
+         * 2. PROCEDURAL 3D VOXEL EXTRACTION ENGINE (MATHEMATICS)
+         * ============================================================================
+         * This system renders the raw SVG to a hidden 2D Canvas, extracts the 
+         * pixel data, computes a Signed Distance Field (SDF), and uses it to 
+         * generate a watertight, 3D hollow shell of perfectly aligned voxels.
+         * Exceedingly complex to guarantee high-performance, hollow-core InstancedMesh.
+         */
+        class VoxelMatrixGenerator {
+            constructor() {
+                this.voxels = [];
+                this.size = CONFIG.voxel.gridSize;
+            }
+
+            async synthesize() {
+                return new Promise((resolve) => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = this.size;
+                    canvas.height = this.size;
+                    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+                    // 1. Render Vector to Canvas
+                    ctx.fillStyle = '#000000';
+                    ctx.fillRect(0, 0, this.size, this.size);
+
+                    // Perfectly center the 100x100 viewBox SVG inside our grid
+                    ctx.translate(this.size / 2, this.size / 2);
+                    const scale = (this.size * 0.85) / 100;
+                    ctx.scale(scale, scale);
+                    ctx.translate(-50, -50);
+
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fill(new Path2D(CONFIG.svgPath));
+
+                    // 2. Extract Binary Map
+                    const imgData = ctx.getImageData(0, 0, this.size, this.size).data;
+                    const binaryGrid = new Int32Array(this.size * this.size);
+                    for (let i = 0; i < this.size * this.size; i++) {
+                        // Any pixel with white becomes a solid matrix block
+                        binaryGrid[i] = imgData[i * 4] > 128 ? 1 : 0;
+                    }
+
+                    // 3. Multi-Pass Chamfer Distance Transform (SDF)
+                    // Calculates Manhattan distance to the nearest edge for volumetric depth.
+                    const distField = new Int32Array(this.size * this.size);
+                    for (let i = 0; i < this.size * this.size; i++) distField[i] = binaryGrid[i];
+
+                    let requiresUpdate = true;
+                    let maxDepthFound = 0;
+
+                    while (requiresUpdate) {
+                        requiresUpdate = false;
+                        for (let y = 1; y < this.size - 1; y++) {
+                            for (let x = 1; x < this.size - 1; x++) {
+                                const i = y * this.size + x;
+                                if (distField[i] > 0) {
+                                    const minEdge = Math.min(
+                                        distField[i - 1],       // Left
+                                        distField[i + 1],       // Right
+                                        distField[i - this.size], // Top
+                                        distField[i + this.size]  // Bottom
+                                    );
+                                    if (minEdge === distField[i]) {
+                                        distField[i] = minEdge + 1;
+                                        requiresUpdate = true;
+                                        if (distField[i] > maxDepthFound) maxDepthFound = distField[i];
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // 4. Generate 3D Voxel Coordinates (Hollow Shell Optimization)
+                    // We only generate voxels that are visible to the camera.
+                    // This reduces rendering load from 150,000+ to around 20,000.
+
+                    const getZDepth = (distance) => Math.max(1, Math.floor(Math.pow(distance, 0.75) * CONFIG.voxel.depthMultiplier));
+
+                    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+
+                    for (let y = 0; y < this.size; y++) {
+                        for (let x = 0; x < this.size; x++) {
+                            const d = distField[y * this.size + x];
+                            if (d > 0) {
+                                const localDepth = getZDepth(d);
+
+                                for (let z = -localDepth; z <= localDepth; z++) {
+
+                                    // Surface Detection Logic
+                                    let isSurface = false;
+                                    if (z === -localDepth || z === localDepth) {
+                                        isSurface = true;
+                                    } else {
+                                        const nL = x > 0 ? distField[y * this.size + x - 1] : 0;
+                                        const nR = x < this.size - 1 ? distField[y * this.size + x + 1] : 0;
+                                        const nT = y > 0 ? distField[(y - 1) * this.size + x] : 0;
+                                        const nB = y < this.size - 1 ? distField[(y + 1) * this.size + x] : 0;
+
+                                        const minNDepth = Math.min(
+                                            getZDepth(nL), getZDepth(nR),
+                                            getZDepth(nT), getZDepth(nB)
+                                        );
+
+                                        if (Math.abs(z) > minNDepth) {
+                                            isSurface = true;
+                                        }
+                                    }
+
+                                    if (isSurface) {
+                                        if (x < minX) minX = x;
+                                        if (x > maxX) maxX = x;
+                                        if (y < minY) minY = y;
+                                        if (y > maxY) maxY = y;
+
+                                        this.voxels.push({
+                                            rawX: x, rawY: y, rawZ: z,
+                                            dist: d,
+                                            maxDist: maxDepthFound
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // 5. Finalize Coordinates & Pre-bake Lighting Colors
+                    const centerX = (minX + maxX) / 2;
+                    const centerY = (minY + maxY) / 2;
+
+                    const cBase = new THREE.Color(CONFIG.colors.base);
+                    const cDark = new THREE.Color(CONFIG.colors.shadow);
+                    const cBright = new THREE.Color(CONFIG.colors.highlight);
+
+                    const finalData = this.voxels.map(v => {
+                        // Center in 3D Space and invert Y
+                        const fx = (v.rawX - centerX) * CONFIG.voxel.spacing;
+                        const fy = -(v.rawY - centerY) * CONFIG.voxel.spacing;
+                        const fz = v.rawZ * CONFIG.voxel.spacing;
+
+                        // Procedural Ambient Occlusion Baking
+                        const vertexColor = new THREE.Color();
+                        const depthRatio = v.dist / v.maxDist;
+
+                        if (v.dist <= 1) {
+                            // Outer sharp edges catch highlights
+                            vertexColor.copy(cBase).lerp(cBright, 0.3);
+                        } else {
+                            // Inner structural valleys recede into shadow
+                            vertexColor.copy(cBase).lerp(cDark, 1.0 - depthRatio);
+                        }
+
+                        // Add microscopic variance to break CGI perfection
+                        vertexColor.offsetHSL(0, 0, (Math.random() - 0.5) * 0.05);
+
+                        // Calculate cascade assembly delay based on radial distance
+                        const rDist = Math.hypot(fx, fy, fz);
+                        const animDelay = rDist * 0.035 + Math.random() * 0.5;
+
+                        return {
+                            x: fx, y: fy, z: fz,
+                            color: vertexColor,
+                            delay: animDelay,
+                            phase: Math.random() * Math.PI * 2.0 // Random offset for chaos
+                        };
+                    });
+
+                    console.log(`[Engine] Synchronized ${finalData.length} Voxel Instances`);
+                    resolve(finalData);
+                });
+            }
+        }
+
+        /* 
+         * ============================================================================
+         * 3. THE GPU SHADER INJECTION (THE SECRET SAUCE)
+         * ============================================================================
+         * Because Three.js cannot animate 25,000+ individual objects smoothly using JS,
+         * we inject custom mathematics directly into the GLSL Vertex Shader.
+         * This ensures 60fps performance on any device.
+         */
+        const CUSTOM_GLSL_UTILS = `
+            // High-Performance 3D Simplex Noise for organic idle waving
+            vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);}
+            vec4 taylorInvSqrt(vec4 r){return 1.79284291400159 - 0.85373472095314 * r;}
+            float snoise(vec3 v){ 
+                const vec2  C = vec2(1.0/6.0, 1.0/3.0);
+                const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
+                vec3 i  = floor(v + dot(v, C.yyy));
+                vec3 x0 = v - i + dot(i, C.xxx);
+                vec3 g = step(x0.yzx, x0.xyz);
+                vec3 l = 1.0 - g;
+                vec3 i1 = min(g.xyz, l.zxy);
+                vec3 i2 = max(g.xyz, l.zxy);
+                vec3 x1 = x0 - i1 + 1.0 * C.xxx;
+                vec3 x2 = x0 - i2 + 2.0 * C.xxx;
+                vec3 x3 = x0 - 1.0 + 3.0 * C.xxx;
+                i = mod(i, 289.0); 
+                vec4 p = permute(permute(permute(i.z + vec4(0.0, i1.z, i2.z, 1.0)) + i.y + vec4(0.0, i1.y, i2.y, 1.0)) + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+                float n_ = 1.0/7.0;
+                vec3  ns = n_ * D.wyz - D.xzx;
+                vec4 j = p - 49.0 * floor(p * ns.z *ns.z);
+                vec4 x_ = floor(j * ns.z);
+                vec4 y_ = floor(j - 7.0 * x_ );
+                vec4 x = x_ *ns.x + ns.yyyy;
+                vec4 y = y_ *ns.x + ns.yyyy;
+                vec4 h = 1.0 - abs(x) - abs(y);
+                vec4 b0 = vec4(x.xy, y.xy);
+                vec4 b1 = vec4(x.zw, y.zw);
+                vec4 s0 = floor(b0)*2.0 + 1.0;
+                vec4 s1 = floor(b1)*2.0 + 1.0;
+                vec4 sh = -step(h, vec4(0.0));
+                vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy;
+                vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
+                vec3 p0 = vec3(a0.xy,h.x);
+                vec3 p1 = vec3(a0.zw,h.y);
+                vec3 p2 = vec3(a1.xy,h.z);
+                vec3 p3 = vec3(a1.zw,h.w);
+                vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
+                p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+                vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+                m = m * m;
+                return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
+            }
+
+            // Extreme Elastic Easing for satisfying snap-into-place physics
+            float easeOutElastic(float x) {
+                float c4 = (2.0 * 3.14159265) / 3.0;
+                if(x <= 0.0) return 0.0;
+                if(x >= 1.0) return 1.0;
+                return pow(2.0, -10.0 * x) * sin((x * 10.0 - 0.75) * c4) + 1.0;
+            }
+
+            // 3D Axis Rotation
+            mat3 rotation3d(vec3 axis, float angle) {
+                axis = normalize(axis);
+                float s = sin(angle);
+                float c = cos(angle);
+                float oc = 1.0 - c;
+                return mat3(
+                    oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,
+                    oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,
+                    oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c
+                );
+            }
+        `;
+
+        /* 
+         * ============================================================================
+         * 4. MAIN THREE.JS APPLICATION ORCHESTRATOR
+         * ============================================================================
+         * Sets up the scene, post-processing, lights, and rendering loop.
+         */
+        class ClaudePixelEngine {
+            constructor() {
+                this.canvas = document.getElementById('webgl-canvas');
+                this.clock = new THREE.Clock();
+                this.shaderUniforms = { uTime: { value: 0 } };
+
+                this.init();
+            }
+
+            async init() {
+                // Generate mathematics first
+                const generator = new VoxelMatrixGenerator();
+                this.voxelData = await generator.synthesize();
+
+                // Setup Environment
+                this.setupScene();
+                this.setupLights();
+                this.buildVoxelMesh();
+                this.setupPostProcessing();
+
+                // Event Listeners
+                window.addEventListener('resize', this.onResize.bind(this), false);
+
+                // Reveal Masterpiece smoothly
+                setTimeout(() => {
+                    const loader = document.getElementById('preloader');
+                    loader.style.opacity = '0';
+                    setTimeout(() => loader.style.visibility = 'hidden', 1500);
+
+                    this.clock.start();
+                    this.animate();
+                }, 600);
+            }
+
+            setupScene() {
+                this.scene = new THREE.Scene();
+                // Subtle fog to blend distant geometries perfectly into the background
+                this.scene.fog = new THREE.FogExp2(CONFIG.colors.ambient, 0.0035);
+
+                this.camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 1, 1000);
+                this.camera.position.set(0, 0, CONFIG.anim.cameraDistance);
+
+                // Multi-sampled WebGL2 Renderer for pristine edges (Pixel Art perfection)
+                this.renderer = new THREE.WebGLRenderer({
+                    canvas: this.canvas,
+                    antialias: true,
+                    alpha: true,
+                    powerPreference: "high-performance"
+                });
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+                // Filmic HDR Tone Mapping
+                this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+                this.renderer.toneMappingExposure = 1.2;
+
+                // High Quality Shadows
+                this.renderer.shadowMap.enabled = true;
+                this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+                // Rotational Container for majestic cinematic movement
+                this.worldGroup = new THREE.Group();
+                this.scene.add(this.worldGroup);
+            }
+
+            setupLights() {
+                // Warm ambient base
+                const ambient = new THREE.AmbientLight(0xffebd6, 0.6);
+                this.scene.add(ambient);
+
+                // Primary Studio Key Light
+                const keyLight = new THREE.DirectionalLight(0xffeedd, 3.0);
+                keyLight.position.set(60, 100, 80);
+                keyLight.castShadow = true;
+                keyLight.shadow.mapSize.width = 2048;
+                keyLight.shadow.mapSize.height = 2048;
+                keyLight.shadow.bias = -0.001;
+                keyLight.shadow.camera.near = 10;
+                keyLight.shadow.camera.far = 400;
+                const d = 100;
+                keyLight.shadow.camera.left = -d;
+                keyLight.shadow.camera.right = d;
+                keyLight.shadow.camera.top = d;
+                keyLight.shadow.camera.bottom = -d;
+                this.scene.add(keyLight);
+
+                // Deep Cool Fill Light for shadow contrast
+                const fillLight = new THREE.DirectionalLight(0x4a6d8c, 1.5);
+                fillLight.position.set(-80, -40, -50);
+                this.scene.add(fillLight);
+
+                // Back Rim Light to separate voxels from the dark void
+                const rimLight = new THREE.DirectionalLight(0xffc2a3, 2.5);
+                rimLight.position.set(0, 60, -120);
+                this.scene.add(rimLight);
+            }
+
+            setupPostProcessing() {
+                this.composer = new EffectComposer(this.renderer);
+                this.composer.addPass(new RenderPass(this.scene, this.camera));
+
+                // Unreal Bloom creates the gorgeous, high-end glowing effect
+                // Specifically targeted at the highlights in our custom shader
+                const bloomPass = new UnrealBloomPass(
+                    new THREE.Vector2(window.innerWidth, window.innerHeight),
+                    0.8,   // Strength
+                    0.6,   // Radius
+                    0.85   // Threshold (Only bright orange glows)
+                );
+                this.composer.addPass(bloomPass);
+
+                this.composer.addPass(new OutputPass());
+            }
+
+            buildVoxelMesh() {
+                const count = this.voxelData.length;
+
+                // The geometry dictates the "Pixel Art" style perfectly.
+                // A BoxGeometry slightly smaller than the grid spacing creates pristine gaps.
+                const geometry = new THREE.BoxGeometry(CONFIG.voxel.boxSize, CONFIG.voxel.boxSize, CONFIG.voxel.boxSize);
+
+                // High-End Physically Based Rendering Material
+                const material = new THREE.MeshStandardMaterial({
+                    color: 0xffffff, // Overridden by GPU vertex colors
+                    roughness: 0.3,
+                    metalness: 0.1
+                });
+
+                // Prepare GPU Attributes
+                const aTarget = new Float32Array(count * 3);
+                const aStart = new Float32Array(count * 3);
+                const aColor = new Float32Array(count * 3);
+                const aParams = new Float32Array(count * 3); // x: delay, y: phase, z: random speed
+                const aAxis = new Float32Array(count * 3);
+
+                this.voxelData.forEach((v, i) => {
+                    const i3 = i * 3;
+
+                    // Final Destination
+                    aTarget[i3 + 0] = v.x;
+                    aTarget[i3 + 1] = v.y;
+                    aTarget[i3 + 2] = v.z;
+
+                    // Starting Position (Massive chaotic spherical scatter)
+                    const radius = 350 + Math.random() * 500;
+                    const theta = Math.random() * Math.PI * 2;
+                    const phi = Math.acos(2 * Math.random() - 1);
+                    aStart[i3 + 0] = radius * Math.sin(phi) * Math.cos(theta);
+                    aStart[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+                    aStart[i3 + 2] = radius * Math.cos(phi) + 150; // Bias towards camera
+
+                    // Pre-baked Ambient Colors
+                    aColor[i3 + 0] = v.color.r;
+                    aColor[i3 + 1] = v.color.g;
+                    aColor[i3 + 2] = v.color.b;
+
+                    // Animation Parameters
+                    aParams[i3 + 0] = v.delay;
+                    aParams[i3 + 1] = v.phase;
+                    aParams[i3 + 2] = 0.5 + Math.random() * 1.5;
+
+                    // Flight Spin Axis
+                    const ax = Math.random() - 0.5, ay = Math.random() - 0.5, az = Math.random() - 0.5;
+                    const len = Math.hypot(ax, ay, az) || 1.0;
+                    aAxis[i3 + 0] = ax / len;
+                    aAxis[i3 + 1] = ay / len;
+                    aAxis[i3 + 2] = az / len;
+                });
+
+                geometry.setAttribute('aTarget', new THREE.InstancedBufferAttribute(aTarget, 3));
+                geometry.setAttribute('aStart', new THREE.InstancedBufferAttribute(aStart, 3));
+                geometry.setAttribute('aColor', new THREE.InstancedBufferAttribute(aColor, 3));
+                geometry.setAttribute('aParams', new THREE.InstancedBufferAttribute(aParams, 3));
+                geometry.setAttribute('aAxis', new THREE.InstancedBufferAttribute(aAxis, 3));
+
+                // ============================================================================
+                // INJECTING COMPLEX ANIMATION MATHEMATICS INTO THE RENDER PIPELINE
+                // ============================================================================
+                material.onBeforeCompile = (shader) => {
+                    shader.uniforms.uTime = this.shaderUniforms.uTime;
+
+                    shader.vertexShader = `
+                        uniform float uTime;
+                        attribute vec3 aStart;
+                        attribute vec3 aTarget;
+                        attribute vec3 aColor;
+                        attribute vec3 aParams;
+                        attribute vec3 aAxis;
+                        
+                        varying vec3 vColor;
+                        varying float vGlow;
+                        
+                        ${CUSTOM_GLSL_UTILS}
+                    ` + shader.vertexShader;
+
+                    // Override Vertex Normals for accurate light reflection during spinning
+                    shader.vertexShader = shader.vertexShader.replace(
+                        '#include <beginnormal_vertex>',
+                        `
+                        #include <beginnormal_vertex>
+                        
+                        float rawProg = (uTime - aParams.x) * 0.45;
+                        float tProg = clamp(rawProg, 0.0, 1.0);
+                        float eased = easeOutElastic(tProg);
+                        
+                        // Chaotic spin during assembly
+                        float spin = (1.0 - eased) * 20.0 * aParams.z;
+                        mat3 rotM = rotation3d(aAxis, spin);
+                        
+                        objectNormal = rotM * objectNormal;
+                        `
+                    );
+
+                    // Override Vertex Positions (The Animation Engine)
+                    shader.vertexShader = shader.vertexShader.replace(
+                        '#include <begin_vertex>',
+                        `
+                        #include <begin_vertex>
+                        
+                        // 1. Assembly Interpolation
+                        vec3 currentPos = mix(aStart, aTarget, eased);
+                        
+                        // 2. Idle Organic Simplex Noise Waving
+                        // Only applies after the voxel has fully snapped into place
+                        float idleTime = max(0.0, uTime - aParams.x - 2.5);
+                        if (idleTime > 0.0) {
+                            // Fluid, non-repeating rippling effect
+                            float noiseZ = snoise(vec3(aTarget.x * 0.03, aTarget.y * 0.03, idleTime * 0.3));
+                            currentPos.z += noiseZ * 1.8;
+                            
+                            // Gentle breathing expansion
+                            float breath = sin(idleTime * 2.0 - length(aTarget.xy) * 0.1) * 0.5;
+                            currentPos.y += breath;
+                        }
+
+                        // 3. Apply Local Geometry Adjustments
+                        transformed = rotM * transformed; // Apply spin
+                        
+                        // Scale up from nothing
+                        float scalePop = smoothstep(0.0, 0.3, tProg);
+                        transformed *= scalePop;
+
+                        // Add macro position
+                        transformed += currentPos;
+
+                        // Pass variables to Fragment Shader
+                        vColor = aColor;
+                        
+                        // 4. Calculate Sweeping Glow Energy
+                        vGlow = 0.0;
+                        if (idleTime > 0.0) {
+                            float dist = length(aTarget.xy);
+                            float sweep = fract(idleTime * 0.2 - dist * 0.015);
+                            if (sweep < 0.15) {
+                                vGlow = sin((sweep / 0.15) * 3.1415) * 0.85;
+                            }
+                        }
+                        `
+                    );
+
+                    shader.fragmentShader = `
+                        varying vec3 vColor;
+                        varying float vGlow;
+                    ` + shader.fragmentShader;
+
+                    // Override Color Output
+                    shader.fragmentShader = shader.fragmentShader.replace(
+                        '#include <color_fragment>',
+                        `
+                        #include <color_fragment>
+                        
+                        vec3 finalColor = vColor;
+                        
+                        // Apply sweeping energy glow
+                        if (vGlow > 0.0) {
+                            vec3 energyCore = vec3(1.0, 0.9, 0.8);
+                            finalColor = mix(finalColor, energyCore, vGlow);
+                            // Multiply > 1.0 to trigger Post-Processing Bloom Pass
+                            finalColor *= (1.0 + vGlow * 2.0);
+                        }
+                        
+                        diffuseColor.rgb = finalColor;
+                        `
+                    );
+                };
+
+                // Depth Material is required to cast accurate shadows during animation
+                const depthMat = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking });
+                depthMat.onBeforeCompile = (shader) => {
+                    shader.uniforms.uTime = this.shaderUniforms.uTime;
+                    shader.vertexShader = `
+                        uniform float uTime;
+                        attribute vec3 aStart;
+                        attribute vec3 aTarget;
+                        attribute vec3 aParams;
+                        attribute vec3 aAxis;
+                        ${CUSTOM_GLSL_UTILS}
+                    ` + shader.vertexShader;
+                    shader.vertexShader = shader.vertexShader.replace(
+                        '#include <begin_vertex>',
+                        `
+                        #include <begin_vertex>
+                        float rawProg = (uTime - aParams.x) * 0.45;
+                        float tProg = clamp(rawProg, 0.0, 1.0);
+                        float eased = easeOutElastic(tProg);
+                        float spin = (1.0 - eased) * 20.0 * aParams.z;
+                        mat3 rotM = rotation3d(aAxis, spin);
+                        
+                        vec3 currentPos = mix(aStart, aTarget, eased);
+                        
+                        float idleTime = max(0.0, uTime - aParams.x - 2.5);
+                        if (idleTime > 0.0) {
+                            float noiseZ = snoise(vec3(aTarget.x * 0.03, aTarget.y * 0.03, idleTime * 0.3));
+                            currentPos.z += noiseZ * 1.8;
+                            currentPos.y += sin(idleTime * 2.0 - length(aTarget.xy) * 0.1) * 0.5;
+                        }
+
+                        transformed = rotM * transformed;
+                        transformed *= smoothstep(0.0, 0.3, tProg);
+                        transformed += currentPos;
+                        `
+                    );
+                };
+
+                this.instancedMesh = new THREE.InstancedMesh(geometry, material, count);
+                this.instancedMesh.castShadow = true;
+                this.instancedMesh.receiveShadow = true;
+                this.instancedMesh.customDepthMaterial = depthMat;
+
+                // Disable Frustum Culling due to dynamic shader positioning
+                this.instancedMesh.frustumCulled = false;
+
+                // Create a dummy matrix to initialize the buffer sizes
+                const dummy = new THREE.Object3D();
+                dummy.updateMatrix();
+                for (let i = 0; i < count; i++) this.instancedMesh.setMatrixAt(i, dummy.matrix);
+
+                this.worldGroup.add(this.instancedMesh);
+            }
+
+            onResize() {
+                this.camera.aspect = window.innerWidth / window.innerHeight;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.composer.setSize(window.innerWidth, window.innerHeight);
+            }
+
+            animate() {
+                // Completely autonomous, un-controllable animation loop.
+                requestAnimationFrame(this.animate.bind(this));
+
+                const elapsedTime = this.clock.getElapsedTime();
+
+                // 1. Sync time to GPU
+                this.shaderUniforms.uTime.value = elapsedTime;
+
+                // 2. Cinematic Global Orbiting
+                // Smooth, majestic camera/world tracking to show off the 3D voxel structure
+                const orbitAngle = elapsedTime * 0.15;
+                this.worldGroup.rotation.y = Math.sin(orbitAngle) * 0.25 + elapsedTime * 0.12;
+                this.worldGroup.rotation.x = Math.sin(elapsedTime * 0.2) * 0.15;
+
+                // Gentle levitation
+                this.worldGroup.position.y = Math.sin(elapsedTime * 1.5) * 3.0;
+
+                // Subtle dynamic camera easing
+                this.camera.position.x = Math.sin(elapsedTime * 0.1) * 20;
+                this.camera.lookAt(0, 0, 0);
+
+                // 3. Render Masterpiece
+                this.composer.render();
+            }
+        }
+
+        // ============================================================================
+        // BOOTSTRAP APPLICATION
+        // ============================================================================
+        window.onload = () => {
+            new ClaudePixelEngine();
+        };
+
+    </script>
+</body>
+
+</html>
