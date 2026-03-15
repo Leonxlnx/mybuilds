@@ -31,12 +31,11 @@
         }
 
         .page {
-            max-width: 720px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 120px 32px 80px;
         }
 
-        /* Header */
         .header {
             margin-bottom: 80px;
         }
@@ -56,9 +55,17 @@
             background: var(--text-dim);
         }
 
-        /* Project */
+        /* Project card */
         .project {
+            display: flex;
+            gap: 32px;
+            align-items: flex-start;
             margin-bottom: 56px;
+        }
+
+        .project-info {
+            flex: 1;
+            min-width: 0;
         }
 
         .project-header {
@@ -97,41 +104,11 @@
             font-weight: 300;
         }
 
-        /* File tree */
-        .tree {
-            margin-left: 40px;
-            font-size: 11px;
-            color: var(--text-dim);
-            line-height: 2;
-            font-weight: 300;
-        }
-
-        .tree-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .tree-branch {
-            color: var(--text-dim);
-            user-select: none;
-        }
-
-        .tree-file {
-            color: var(--text-muted);
-            transition: color 0.2s;
-        }
-
-        .tree-file:hover {
-            color: var(--text);
-        }
-
-        /* Links row */
+        /* Links */
         .project-links {
             display: flex;
             gap: 24px;
             margin-left: 40px;
-            margin-top: 16px;
         }
 
         .project-link {
@@ -154,6 +131,34 @@
         }
 
         .project-link:hover::before {
+            opacity: 1;
+        }
+
+        /* Preview image */
+        .project-preview {
+            width: 280px;
+            flex-shrink: 0;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .project-preview:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .project-preview img {
+            width: 100%;
+            height: auto;
+            display: block;
+            opacity: 0.85;
+            transition: opacity 0.4s ease;
+        }
+
+        .project-preview:hover img {
             opacity: 1;
         }
 
@@ -195,7 +200,6 @@
             color: var(--text);
         }
 
-        /* Dot pulse */
         .pulse {
             display: inline-block;
             width: 4px;
@@ -211,9 +215,11 @@
             50% { opacity: 0.8; }
         }
 
-        @media (max-width: 600px) {
+        @media (max-width: 700px) {
             .page { padding: 64px 20px 48px; }
-            .project-desc, .tree, .project-links { margin-left: 0; }
+            .project { flex-direction: column-reverse; gap: 20px; }
+            .project-preview { width: 100%; }
+            .project-desc, .project-links { margin-left: 0; }
             .project-header { gap: 10px; }
         }
     </style>
@@ -228,38 +234,48 @@
 
         <!-- Project 01 -->
         <div class="project">
-            <div class="project-header">
-                <span class="project-index">01</span>
-                <a href="http://localhost:5173" target="_blank" class="project-name">jelly-slider</a>
+            <div class="project-info">
+                <div class="project-header">
+                    <span class="project-index">01</span>
+                    <a href="http://localhost:5173" target="_blank" class="project-name">jelly-slider</a>
+                </div>
+                <div class="project-desc">
+                    real-time 3d jelly slider rendered via gpu raymarching.<br>
+                    sdf physics simulation, fresnel refraction, beer-lambert absorption, taa.
+                </div>
+                <div class="project-links">
+                    <a href="http://localhost:5173" target="_blank" class="project-link">open</a>
+                    <a href="https://github.com/Leonxlnx/mybuilds/tree/main/jelly-slider" target="_blank" class="project-link">code</a>
+                    <a href="./jelly-slider/prompt.md" target="_blank" class="project-link">prompt</a>
+                </div>
             </div>
-            <div class="project-desc">
-                real-time 3d jelly slider rendered via gpu raymarching.<br>
-                sdf physics simulation, fresnel refraction, beer-lambert absorption, taa.
-            </div>
-            <div class="project-links">
-                <a href="http://localhost:5173" target="_blank" class="project-link">open</a>
-                <a href="https://github.com/Leonxlnx/mybuilds/tree/main/jelly-slider" target="_blank" class="project-link">code</a>
-                <a href="./jelly-slider/prompt.md" target="_blank" class="project-link">prompt</a>
-            </div>
+            <a href="http://localhost:5173" target="_blank" class="project-preview">
+                <img src="./img/jelly-slider.png" alt="jelly-slider preview">
+            </a>
         </div>
 
         <div class="divider"></div>
 
         <!-- Project 02 -->
         <div class="project">
-            <div class="project-header">
-                <span class="project-index">02</span>
-                <a href="./animated-login/" class="project-name">animated-login</a>
+            <div class="project-info">
+                <div class="project-header">
+                    <span class="project-index">02</span>
+                    <a href="./animated-login/" class="project-name">animated-login</a>
+                </div>
+                <div class="project-desc">
+                    login form with character animations and interactive reactions.<br>
+                    mouse-following eyes, success/fail states, micro-interactions.
+                </div>
+                <div class="project-links">
+                    <a href="./animated-login/" class="project-link">open</a>
+                    <a href="https://github.com/Leonxlnx/mybuilds/tree/main/animated-login" target="_blank" class="project-link">code</a>
+                    <a href="./animated-login/prompt.md" target="_blank" class="project-link">prompt</a>
+                </div>
             </div>
-            <div class="project-desc">
-                login form with character animations and interactive reactions.<br>
-                mouse-following eyes, success/fail states, micro-interactions.
-            </div>
-            <div class="project-links">
-                <a href="./animated-login/" class="project-link">open</a>
-                <a href="https://github.com/Leonxlnx/mybuilds/tree/main/animated-login" target="_blank" class="project-link">code</a>
-                <a href="./animated-login/prompt.md" target="_blank" class="project-link">prompt</a>
-            </div>
+            <a href="./animated-login/" class="project-preview">
+                <img src="./img/animated-login.png" alt="animated-login preview">
+            </a>
         </div>
 
         <div class="footer">
