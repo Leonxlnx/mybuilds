@@ -1,0 +1,30 @@
+body,
+html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #050608;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    /* Prevents any text selection or interaction */
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* 
+ * The canvas spans the entire screen but renders internally at a much lower 
+ * resolution to perfectly simulate authentic, ultra-detailed pixel art.
+ */
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    /* Forces chunky, crisp nearest-neighbor scaling on all browsers */
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
+}

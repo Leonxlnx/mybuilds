@@ -1,0 +1,92 @@
+/*
+ * ============================================================================
+ * GLOBAL STYLING & CLEAN PRESENTATION
+ * ==========================================
+ * Minimalist, text-free, zero-scroll interface.
+ * The background uses a sophisticated, deep, warm radial gradient 
+ * to emulate high-end cinematic studio lighting that perfectly 
+ * contrasts with the Claude Orange (#D97757).
+ * NO text, NO scrollbars, purely visual.
+ * ============================================================================
+ */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body,
+html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    /* Deep studio backdrop */
+    background-color: #0d0a09;
+    background: radial-gradient(circle at center, #261c18 0%, #080605 100%);
+    overflow: hidden;
+
+    /* Disable all user interactions as requested ("nicht steuerbar") */
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: default;
+}
+
+/* The WebGL Canvas container must have no outline */
+#webgl-canvas {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    outline: none;
+    z-index: 1;
+}
+
+/* 
+ * ============================================================================
+ * ABSTRACT PIXEL LOADING OVERLAY (NO TEXT)
+ * ==========================================
+ * Keeps the UI completely clean. A geometric 3D bouncing pixel block 
+ * signals the loading state while the heavy 3D voxel math is processed.
+ * ============================================================================
+ */
+#preloader {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #080605;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 1.5s cubic-bezier(0.16, 1, 0.3, 1), visibility 1.5s;
+}
+
+.pixel-spinner {
+    width: 24px;
+    height: 24px;
+    background-color: #D97757;
+    /* Claude Orange */
+    animation: flip-bounce 1.5s infinite cubic-bezier(0.4, 0.0, 0.2, 1);
+    box-shadow: 0 0 30px rgba(217, 119, 87, 0.5);
+}
+
+@keyframes flip-bounce {
+    0% {
+        transform: perspective(200px) rotateX(0deg) rotateY(0deg) scale(1);
+    }
+
+    50% {
+        transform: perspective(200px) rotateX(-180deg) rotateY(0deg) scale(1.2);
+        background-color: #FFB39A;
+    }
+
+    100% {
+        transform: perspective(200px) rotateX(-180deg) rotateY(-180deg) scale(1);
+    }
+}
