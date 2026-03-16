@@ -1,0 +1,284 @@
+/* =========================================
+   1. APPLE THEME VARIABLEN
+   ========================================= */
+:root {
+    /* Hintergrund & Ambient Light Blobs */
+    --bg-color: #e5e5ea;
+    --blob-1: #ff2a5f;
+    --blob-2: #007aff;
+    --blob-3: #ff9500;
+    --blob-opacity: 0.7;
+
+    /* Echtes Liquid Glass - Light Mode */
+    --glass-bg: rgba(255, 255, 255, 0.15);
+    --glass-border: rgba(255, 255, 255, 0.4);
+    --glass-shadow: rgba(0, 0, 0, 0.1);
+    --glass-highlight: rgba(255, 255, 255, 0.8);
+    --glass-caustic: rgba(255, 255, 255, 0.4);
+    --reflection-start: rgba(255, 255, 255, 0.6);
+    --reflection-end: rgba(255, 255, 255, 0.0);
+    --glare-color: rgba(255, 255, 255, 0.5);
+
+    /* Slider Pill & Icons */
+    --pill-bg: rgba(255, 255, 255, 0.7);
+    --pill-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05), inset 0 1px 1px rgba(255,255,255,0.8);
+    --icon-color: rgba(0, 0, 0, 0.5);
+    --icon-active: rgba(0, 0, 0, 0.95);
+    --divider: rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="dark"] {
+    /* Hintergrund & Ambient Light Blobs */
+    --bg-color: #000000;
+    --blob-1: #bf5af2;
+    --blob-2: #0a84ff;
+    --blob-3: #ff375f;
+    --blob-opacity: 0.5;
+
+    /* Echtes Liquid Glass - Dark Mode */
+    --glass-bg: rgba(30, 30, 35, 0.45);
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --glass-shadow: rgba(0, 0, 0, 0.8);
+    --glass-highlight: rgba(255, 255, 255, 0.25);
+    --glass-caustic: rgba(255, 255, 255, 0.05);
+    --reflection-start: rgba(255, 255, 255, 0.15);
+    --reflection-end: rgba(255, 255, 255, 0.0);
+    --glare-color: rgba(255, 255, 255, 0.15);
+
+    /* Slider Pill & Icons */
+    --pill-bg: rgba(60, 60, 65, 0.8);
+    --pill-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.2);
+    --icon-color: rgba(255, 255, 255, 0.5);
+    --icon-active: #ffffff;
+    --divider: rgba(255, 255, 255, 0.15);
+}
+
+/* =========================================
+   2. GLOBALES SETUP & HINTERGRUND
+   ========================================= */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: transparent;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+}
+
+/* Der farbige Mesh-Hintergrund */
+.bg-mesh {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--bg-color);
+    transition: background 0.8s ease;
+    overflow: hidden;
+}
+
+.blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: var(--blob-opacity);
+    animation: float 20s infinite alternate cubic-bezier(0.45, 0.05, 0.55, 0.95);
+    will-change: transform;
+    transition: background 0.8s ease, opacity 0.8s ease;
+}
+
+.blob-1 { width: 50vw; height: 50vw; top: -10%; left: -10%; background: var(--blob-1); animation-delay: 0s; }
+.blob-2 { width: 45vw; height: 45vw; bottom: -10%; right: -10%; background: var(--blob-2); animation-delay: -5s; }
+.blob-3 { width: 35vw; height: 35vw; top: 30%; left: 40%; background: var(--blob-3); animation-delay: -10s; }
+
+@keyframes float {
+    0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+    33% { transform: translate(5%, 10%) scale(1.05) rotate(5deg); }
+    66% { transform: translate(-5%, 5%) scale(0.95) rotate(-5deg); }
+    100% { transform: translate(0, -10%) scale(1.1) rotate(0deg); }
+}
+
+/* =========================================
+   3. DAS LIQUID GLASS GEHÄUSE
+   ========================================= */
+.liquid-nav {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    border-radius: 99px;
+
+    background: var(--glass-bg);
+    backdrop-filter: blur(50px) saturate(200%);
+    -webkit-backdrop-filter: blur(50px) saturate(200%);
+
+    box-shadow:
+        0 40px 80px -20px var(--glass-shadow),
+        0 10px 30px -10px var(--glass-shadow),
+        inset 0 2px 3px -1px var(--glass-highlight),
+        inset 0 -2px 4px -1px var(--glass-caustic),
+        inset 0 0 0 1px var(--glass-border);
+
+    transition: all 0.5s ease;
+    z-index: 10;
+}
+
+/* Die klassische gebogene Aqua-Spiegelung */
+.liquid-nav::before {
+    content: '';
+    position: absolute;
+    top: 1px; left: 1px; right: 1px; height: 46%;
+    border-radius: 99px 99px 24px 24px / 99px 99px 12px 12px;
+    background: linear-gradient(180deg, var(--reflection-start) 0%, var(--reflection-end) 100%);
+    pointer-events: none;
+    z-index: 6;
+    transition: background 0.5s ease;
+}
+
+/* Interaktiver Lichtkegel */
+.liquid-glare-container {
+    position: absolute;
+    inset: 0;
+    border-radius: 99px;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.liquid-glare {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    background: radial-gradient(circle 90px at var(--x, 50%) var(--y, 50%), var(--glare-color) 0%, transparent 100%);
+    mix-blend-mode: overlay;
+}
+
+.liquid-nav:hover .liquid-glare {
+    opacity: 1;
+}
+
+/* =========================================
+   4. NAVIGATION BUTTONS & SLIDER
+   ========================================= */
+.nav-items {
+    position: relative;
+    display: flex;
+    gap: 4px;
+    z-index: 3;
+}
+
+.active-pill {
+    position: absolute;
+    top: 0; left: 0;
+    height: 44px;
+    background: var(--pill-bg);
+    border-radius: 99px;
+    box-shadow: var(--pill-shadow);
+
+    transition: transform 0.5s cubic-bezier(0.34, 1.2, 0.64, 1),
+                width 0.5s cubic-bezier(0.34, 1.2, 0.64, 1),
+                background 0.5s ease, box-shadow 0.5s ease;
+    z-index: 1;
+}
+
+.nav-btn {
+    position: relative;
+    background: transparent;
+    border: none;
+    padding: 0 20px;
+    height: 44px;
+    border-radius: 99px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--icon-color);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.3s ease;
+    outline: none;
+    z-index: 2;
+}
+
+.btn-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+    transition: transform 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.nav-btn:active .btn-content {
+    transform: scale(0.92);
+}
+
+.nav-btn.active {
+    color: var(--icon-active);
+}
+
+/* =========================================
+   5. DIVIDER & DARK MODE THEME BUTTON
+   ========================================= */
+.divider {
+    width: 1px;
+    height: 24px;
+    background: var(--divider);
+    margin: 0 4px;
+    z-index: 3;
+    transition: background 0.5s ease;
+}
+
+.theme-btn {
+    position: relative;
+    background: transparent;
+    border: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    color: var(--icon-color);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    z-index: 3;
+    outline: none;
+    margin-left: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s ease;
+}
+
+.theme-btn:hover, .theme-btn:active {
+    color: var(--icon-active);
+}
+
+.theme-icon-wrapper {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+    transition: transform 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.theme-btn:active .theme-icon-wrapper {
+    transform: scale(0.8);
+}
+
+.theme-icon-wrapper svg {
+    position: absolute;
+    top: 0; left: 0;
+    transition: transform 0.5s cubic-bezier(0.34, 1.2, 0.64, 1), opacity 0.4s ease;
+    stroke-width: 2.2;
+}
+
+/* Sonne & Mond Animations-Wechsel */
+.sun { opacity: 1; transform: rotate(0deg) scale(1); }
+.moon { opacity: 0; transform: rotate(-90deg) scale(0); }
+
+[data-theme="dark"] .sun { opacity: 0; transform: rotate(90deg) scale(0); }
+[data-theme="dark"] .moon { opacity: 1; transform: rotate(0deg) scale(1); }
