@@ -1,0 +1,234 @@
+/* =========================================
+   THEME VARIABLES & COLOR PALETTE
+   ========================================= */
+:root {
+    /* Light Theme - Soft Linen/Cotton */
+    --bg: #e2e8f0;
+    --nav-bg: #f8fafc;
+    --icon: #64748b;
+    --icon-hover: #0f172a;
+    --shadow-outer-1: rgba(148, 163, 184, 0.45);
+    --shadow-outer-2: rgba(255, 255, 255, 1);
+    --shadow-inner-1: rgba(255, 255, 255, 0.8);
+    --shadow-inner-2: rgba(148, 163, 184, 0.2);
+    --stitch: rgba(0, 0, 0, 0.03);
+    --dent: rgba(15, 23, 42, 0.12);
+    --divider: rgba(148, 163, 184, 0.3);
+}
+
+body.dark {
+    /* Dark Theme - Deep Felt/Velvet */
+    --bg: #0f172a;
+    --nav-bg: #1e293b;
+    --icon: #94a3b8;
+    --icon-hover: #f1f5f9;
+    --shadow-outer-1: rgba(0, 0, 0, 0.6);
+    --shadow-outer-2: rgba(30, 41, 59, 0.5);
+    --shadow-inner-1: rgba(255, 255, 255, 0.05);
+    --shadow-inner-2: rgba(0, 0, 0, 0.4);
+    --stitch: rgba(255, 255, 255, 0.025);
+    --dent: rgba(0, 0, 0, 0.5);
+    --divider: rgba(0, 0, 0, 0.4);
+}
+
+/* =========================================
+   GLOBAL RESET & LAYOUT
+   ========================================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--bg);
+    transition: background-color 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+/* Ambient body texture */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.15;
+    mix-blend-mode: overlay;
+    z-index: -1;
+}
+
+/* =========================================
+   NAVIGATION CONTAINER & 3D WRAPPER
+   ========================================= */
+.nav-wrapper {
+    perspective: 1200px;
+    z-index: 1;
+}
+
+.nav-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 22px;
+    background-color: var(--nav-bg);
+    border-radius: 50px;
+    touch-action: none;
+    will-change: transform;
+
+    /* Deep, soft 3D neumorphic shadow */
+    box-shadow:
+        16px 16px 36px var(--shadow-outer-1),
+        -16px -16px 36px var(--shadow-outer-2),
+        inset 1.5px 1.5px 3px var(--shadow-inner-1),
+        inset -1.5px -1.5px 3px var(--shadow-inner-2);
+
+    transition: background-color 0.8s ease, box-shadow 0.8s ease;
+}
+
+/* =========================================
+   FABRIC MATERIAL TEXTURES
+   ========================================= */
+/* Diagonal Woven Thread Array */
+.fabric-mesh {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background-image:
+        repeating-linear-gradient(45deg, transparent, transparent 2px, var(--stitch) 2px, var(--stitch) 4px),
+        repeating-linear-gradient(-45deg, transparent, transparent 2px, var(--stitch) 2px, var(--stitch) 4px);
+    z-index: 1;
+    opacity: 0.8;
+}
+
+/* Organic Material Fractal Noise */
+.fabric-noise {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+    opacity: 0.3;
+    z-index: 2;
+}
+
+/* Dynamic Denting Shadow */
+.dent {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 260px;
+    height: 260px;
+    background: radial-gradient(circle, var(--dent) 0%, transparent 60%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 3;
+    transform: translate(calc(var(--dent-x) - 130px), calc(var(--dent-y) - 130px)) scale(var(--dent-scale));
+    opacity: var(--dent-scale);
+}
+
+/* =========================================
+   INTERACTIVE NAVIGATION ITEMS
+   ========================================= */
+.nav-btn {
+    position: relative;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    outline: none;
+    color: var(--icon);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: color 0.4s ease;
+    will-change: transform;
+}
+
+.nav-btn svg {
+    width: 24px;
+    height: 24px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    pointer-events: none;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.nav-btn:hover { color: var(--icon-hover); }
+.nav-btn:hover svg { transform: scale(1.15); }
+.nav-btn.active { color: var(--icon-hover); }
+
+/* Active Under-Dot */
+.nav-item::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: var(--icon-hover);
+    opacity: 0;
+    transform: scale(0);
+    transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.8s ease;
+}
+
+.nav-item.active::after {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Etched Seam Divider */
+.divider {
+    width: 2px;
+    height: 28px;
+    background-color: var(--divider);
+    margin: 0 4px;
+    border-radius: 2px;
+    z-index: 10;
+    pointer-events: none;
+    transition: background-color 0.8s ease;
+    will-change: transform;
+}
+
+/* =========================================
+   THEME SWITCHER
+   ========================================= */
+.theme-icon-container {
+    position: relative;
+    width: 24px;
+    height: 24px;
+    pointer-events: none;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.nav-btn:hover .theme-icon-container { transform: scale(1.15); }
+
+.theme-icon-container svg {
+    position: absolute;
+    inset: 0;
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease;
+}
+
+body:not(.dark) .sun { transform: rotate(0) scale(1); opacity: 1; }
+body:not(.dark) .moon { transform: rotate(-90deg) scale(0); opacity: 0; }
+
+body.dark .sun { transform: rotate(90deg) scale(0); opacity: 0; }
+body.dark .moon { transform: rotate(0) scale(1); opacity: 1; }
