@@ -1,0 +1,192 @@
+/* ==========================================
+   Optical Illusion — Ultra Clean UI
+   ========================================== */
+
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #000000;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+canvas {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+/* ==========================================
+   Background Overlay (Dim + Blur)
+   ========================================== */
+
+#bg-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0);
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+    pointer-events: none;
+    z-index: 5;
+    transition: background 0.8s ease, backdrop-filter 0.8s ease;
+}
+
+#bg-overlay.active {
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    pointer-events: auto;
+}
+
+/* ==========================================
+   UI Container & Card Panel
+   ========================================== */
+
+#ui-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    z-index: 10;
+    perspective: 1500px;
+}
+
+#card {
+    width: 380px;
+    max-width: 90vw;
+    background: rgba(18, 18, 18, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow:
+        0 40px 80px rgba(0, 0, 0, 0.9),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    opacity: 0;
+    pointer-events: auto;
+    transform: rotateX(15deg) translateY(50px) scale(0.95);
+    transform-origin: center bottom;
+}
+
+/* ==========================================
+   Card Image
+   ========================================== */
+
+.card-img {
+    width: 100%;
+    height: 220px;
+    position: relative;
+}
+
+.card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(40%) contrast(120%);
+}
+
+.card-img::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    background: linear-gradient(to top, rgba(18, 18, 18, 1) 0%, transparent 100%);
+}
+
+/* ==========================================
+   Card Content
+   ========================================== */
+
+.content {
+    padding: 30px;
+    position: relative;
+}
+
+.tag {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #d0d0d0;
+    margin-bottom: 14px;
+}
+
+.content h2 {
+    margin: 0 0 12px 0;
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+}
+
+.content p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #a0a0a0;
+    font-weight: 300;
+}
+
+/* ==========================================
+   Close Button
+   ========================================== */
+
+#close-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 34px;
+    height: 34px;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#close-btn:hover {
+    background: #ffffff;
+    color: #000000;
+    transform: scale(1.1) rotate(90deg);
+}
+
+#close-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* ==========================================
+   Responsive
+   ========================================== */
+
+@media (max-width: 768px) {
+    #ui-container {
+        justify-content: center;
+        padding-right: 0;
+    }
+}
