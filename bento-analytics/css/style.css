@@ -1,0 +1,241 @@
+/* ==========================================================================
+   1. CSS VARIABLES & THEME SETUP
+   ========================================================================== */
+:root {
+    --bg-body: #FAFAFA;
+    --bg-card: #FFFFFF;
+    --text-main: #0F172A;
+    --text-muted: #64748B;
+    --border-color: #E2E8F0;
+
+    --shadow-card: 0 10px 40px -10px rgba(0, 0, 0, 0.04);
+    --shadow-hover: 0 20px 40px -10px rgba(0, 0, 0, 0.08);
+
+    --glow-base: rgba(59, 130, 246, 0.03);
+    --glow-mouse: rgba(59, 130, 246, 0.08);
+
+    --badge-bg: #DCFCE7;
+    --badge-text: #16A34A;
+    --accent-green: #10B981;
+
+    --chart-insta: #FF8A65;
+    --chart-yt: #FFB74D;
+    --chart-negozio: #4ADE80;
+    --chart-tiktok: #60A5FA;
+
+    --globe-sea: transparent;
+    --globe-land: #E2E8F0;
+    --globe-border: #FFFFFF;
+    --globe-highlight: #3B82F6;
+
+    --transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.dark {
+    --bg-body: #09090B;
+    --bg-card: #18181B;
+    --text-main: #F8FAFC;
+    --text-muted: #94A3B8;
+    --border-color: #27272A;
+
+    --shadow-card: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+    --shadow-hover: 0 20px 40px -10px rgba(0, 0, 0, 0.7);
+
+    --glow-base: rgba(59, 130, 246, 0.08);
+    --glow-mouse: rgba(59, 130, 246, 0.15);
+
+    --badge-bg: rgba(16, 185, 129, 0.15);
+    --badge-text: #34D399;
+    --accent-green: #34D399;
+
+    --globe-land: #27272A;
+    --globe-border: #18181B;
+    --globe-highlight: #60A5FA;
+}
+
+/* ==========================================================================
+   2. GLOBAL STYLES & LAYOUT
+   ========================================================================== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+body {
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 24px;
+    transition: background-color var(--transition), color var(--transition);
+}
+
+.bento-grid {
+    width: 100%;
+    max-width: 1050px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.theme-toggle {
+    position: fixed;
+    top: 32px;
+    right: 32px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow-card);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background-color var(--transition), border-color var(--transition);
+    z-index: 1000;
+}
+
+.theme-toggle:hover { transform: scale(1.1) rotate(15deg); }
+.theme-toggle svg { width: 22px; height: 22px; transition: transform 0.5s; }
+.theme-toggle .moon { display: none; }
+body.dark .theme-toggle .sun { display: none; }
+body.dark .theme-toggle .moon { display: block; }
+body.dark .theme-toggle svg { transform: rotate(-360deg); }
+
+/* ==========================================================================
+   3. BENTO CARDS & GLOW EFFECTS
+   ========================================================================== */
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 28px;
+    padding: 32px;
+    box-shadow: var(--shadow-card);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color var(--transition), border-color var(--transition);
+
+    opacity: 0;
+    transform: translateY(30px);
+    animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.card:nth-child(1) { grid-column: span 2; animation-delay: 0.1s; }
+.card:nth-child(2) { grid-column: span 1; animation-delay: 0.2s; padding-bottom: 0; }
+.card:nth-child(3) { grid-column: span 1; animation-delay: 0.3s; padding-bottom: 0; }
+.card:nth-child(4) { grid-column: span 1; animation-delay: 0.4s; }
+.card:nth-child(5) { grid-column: span 1; animation-delay: 0.5s; padding: 0; }
+
+@keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
+
+.glow-base {
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 50% 0%, var(--glow-base) 0%, transparent 60%);
+    pointer-events: none; z-index: 0;
+}
+
+.glow-mouse {
+    position: absolute;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle at center, var(--glow-mouse) 0%, transparent 60%);
+    border-radius: 50%;
+    pointer-events: none; z-index: 1;
+    transform: translate(-50%, -50%);
+    opacity: 0; transition: opacity 0.3s ease;
+}
+
+.card:hover .glow-mouse { opacity: 1; }
+
+.card-content {
+    position: relative; z-index: 2;
+    height: 100%; display: flex; flex-direction: column;
+}
+
+/* Typography */
+.card-title { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; }
+.card-value { font-size: 3.5rem; font-weight: 800; line-height: 1; letter-spacing: -1.5px; color: var(--text-main); }
+.card-badge { display: inline-flex; align-items: center; gap: 4px; background: var(--badge-bg); color: var(--badge-text); padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; margin-top: 10px; width: max-content; }
+
+/* ==========================================================================
+   4. SPECIFIC CARD COMPONENTS
+   ========================================================================== */
+
+/* Arc Chart (Gauge) */
+.arc-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; }
+.arc-svg { width: 100%; max-width: 440px; overflow: visible; }
+.arc-path { transition: stroke-width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease, opacity 0.3s ease; cursor: pointer; }
+.arc-path:hover { stroke-width: 34; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1)); }
+
+.arc-center { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); text-align: center; pointer-events: none; }
+.arc-center .val { font-size: 4.5rem; font-weight: 800; letter-spacing: -2px; line-height: 1; }
+.arc-center .lbl { font-size: 0.95rem; font-weight: 600; color: var(--text-muted); margin-top: 4px; }
+
+/* Dynamic Tooltip */
+.chart-tooltip {
+    position: fixed; pointer-events: none; opacity: 0;
+    background: var(--bg-card); border: 1px solid var(--border-color);
+    padding: 12px 16px; border-radius: 16px; box-shadow: var(--shadow-card);
+    display: flex; align-items: center; gap: 12px;
+    transform: translate(-50%, -120%) scale(0.9);
+    transition: opacity 0.2s, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 1000;
+}
+
+.chart-tooltip.active { opacity: 1; transform: translate(-50%, -120%) scale(1); }
+.tt-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; justify-content: center; align-items: center; color: white; }
+.tt-icon svg { width: 18px; height: 18px; }
+.tt-val { font-size: 1.25rem; font-weight: 800; line-height: 1; color: var(--text-main); }
+.tt-lbl { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-top: 2px; }
+
+/* Area Sparklines */
+.area-container { margin-top: auto; margin-left: -32px; margin-right: -32px; height: 120px; position: relative; }
+.area-svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.area-fill { opacity: 0; animation: fadeIn 1.5s ease 0.8s forwards; }
+.area-line { fill: none; stroke: var(--accent-green); stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: drawLine 2s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards; }
+
+@keyframes drawLine { to { stroke-dashoffset: 0; } }
+@keyframes fadeIn { to { opacity: 1; } }
+
+/* Countries List */
+.country-list { display: flex; flex-direction: column; gap: 16px; margin-top: 20px; }
+.country-item { display: flex; align-items: center; gap: 14px; opacity: 0; transform: translateX(-15px); animation: slideRight 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; cursor: default; transition: transform 0.2s ease; }
+.country-item:hover { transform: translateX(6px); }
+@keyframes slideRight { to { opacity: 1; transform: translateX(0); } }
+.c-flag { font-size: 1.3rem; }
+.c-name { flex: 1; font-size: 0.9rem; font-weight: 600; }
+.c-val { font-size: 0.95rem; font-weight: 800; width: 30px; text-align: right; }
+.c-bar-bg { width: 50px; height: 6px; background: var(--border-color); border-radius: 3px; overflow: hidden; }
+.c-bar-fill { height: 100%; background: var(--text-muted); border-radius: 3px; width: 0; transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1); }
+.c-pct { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); width: 34px; text-align: right; }
+
+/* 3D Globe */
+.globe-wrapper { width: 100%; height: 100%; min-height: 280px; display: flex; justify-content: center; align-items: center; position: relative; overflow: hidden; border-radius: 28px; }
+#globe-canvas { width: 100%; height: 100%; cursor: grab; }
+#globe-canvas:active { cursor: grabbing; }
+
+/* Responsive */
+@media (max-width: 960px) {
+    .bento-grid { grid-template-columns: repeat(2, 1fr); }
+    .card:nth-child(1) { grid-column: span 2; }
+    .card:nth-child(4), .card:nth-child(5) { grid-column: span 1; }
+}
+
+@media (max-width: 640px) {
+    .bento-grid { grid-template-columns: 1fr; }
+    .card { grid-column: span 1 !important; }
+}

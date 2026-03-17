@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Bento Grid Analytics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/topojson-client@3"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle Theme">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+    </button>
+
+    <div class="chart-tooltip" id="chart-tooltip">
+        <div class="tt-icon" id="tt-icon"></div>
+        <div>
+            <div class="tt-val" id="tt-val">0</div>
+            <div class="tt-lbl" id="tt-lbl">Platform</div>
+        </div>
+    </div>
+
+    <div class="bento-grid">
+        
+        <div class="card">
+            <div class="glow-base"></div><div class="glow-mouse"></div>
+            <div class="card-content">
+                <div class="arc-wrapper">
+                    <svg class="arc-svg" viewBox="0 0 400 240" id="arc-chart"></svg>
+                    <div class="arc-center">
+                        <div class="val counter" data-target="447">0</div>
+                        <div class="lbl">Tot Clicks</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="glow-base"></div><div class="glow-mouse"></div>
+            <div class="card-content">
+                <div class="card-title">UNIQUE VISITS</div>
+                <div class="card-value"><span class="counter" data-target="84.2" data-decimals="1">0</span>K</div>
+                <div class="card-badge">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                    +24%
+                </div>
+                <div class="area-container">
+                    <svg class="area-svg" viewBox="0 0 300 100" preserveAspectRatio="none">
+                        <defs>
+                            <linearGradient id="grad1" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="var(--accent-green)" stop-opacity="0.25"/>
+                                <stop offset="100%" stop-color="var(--accent-green)" stop-opacity="0"/>
+                            </linearGradient>
+                        </defs>
+                        <path class="area-fill" fill="url(#grad1)" d="M0,70 C50,60 80,90 140,50 C200,10 240,40 300,20 L300,100 L0,100 Z"/>
+                        <path class="area-line" d="M0,70 C50,60 80,90 140,50 C200,10 240,40 300,20"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="glow-base"></div><div class="glow-mouse"></div>
+            <div class="card-content">
+                <div class="card-title">TODAY</div>
+                <div class="card-value"><span class="counter" data-target="7.2" data-decimals="1">0</span>K</div>
+                <div class="card-badge">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                    +14%
+                </div>
+                <div class="area-container">
+                    <svg class="area-svg" viewBox="0 0 300 100" preserveAspectRatio="none">
+                        <defs>
+                            <linearGradient id="grad2" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="var(--accent-green)" stop-opacity="0.25"/>
+                                <stop offset="100%" stop-color="var(--accent-green)" stop-opacity="0"/>
+                            </linearGradient>
+                        </defs>
+                        <path class="area-fill" fill="url(#grad2)" d="M0,80 C60,75 100,20 160,40 C220,60 260,10 300,30 L300,100 L0,100 Z"/>
+                        <path class="area-line" d="M0,80 C60,75 100,20 160,40 C220,60 260,10 300,30"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="glow-base"></div><div class="glow-mouse"></div>
+            <div class="card-content">
+                <div class="card-title">COUNTRIES</div>
+                <div class="country-list" id="country-list"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="glow-base"></div><div class="glow-mouse"></div>
+            <div class="card-content" style="padding: 0;">
+                <div class="globe-wrapper">
+                    <div id="globe-canvas"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
